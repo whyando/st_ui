@@ -30,7 +30,7 @@ export default function App() {
     });
     socket.on("connect", () => {
       console.log('socket connected');
-      socket.emit('ping', 'ping')
+      // socket.emit('ping', 'ping')
       setSocket(socket);
     });
     socket.on("disconnect", () => {
