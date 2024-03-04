@@ -11,10 +11,11 @@ import {
 import { useEffect, useState } from "react";
 import type { Socket } from "socket.io-client";
 import io from "socket.io-client";
-
 import { SocketProvider } from "~/context";
+import stylesheet from "~/tailwind.css";
 
 export const links: LinksFunction = () => [
+  { rel: "stylesheet", href: stylesheet },
   ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
 ];
 
@@ -30,14 +31,14 @@ export default function App() {
     });
     socket.on("connect", () => {
       console.log('socket connected');
-      // socket.emit('ping', 'ping')
       setSocket(socket);
     });
     socket.on("disconnect", () => {
       console.log('socket disconnected');
+      setSocket(undefined);
     })
     socket.onAny((eventName, ...args) => {
-      console.log(eventName, args);
+      // console.log(eventName, args);
     });
     return () => {
       console.log('close socket');
@@ -46,14 +47,14 @@ export default function App() {
   }, []);
 
   return (
-    <html lang="en">
+    <html lang="en" className = "h-full w-full">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className = "h-full w-full">
         <SocketProvider socket={socket}>
           <Outlet />
         </SocketProvider>
