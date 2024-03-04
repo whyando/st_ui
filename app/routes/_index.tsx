@@ -213,6 +213,7 @@ export default function Index() {
     const system_symbol = agent.headquarters.split('-').slice(0, 2).join('-');
     const num_visible = filters.filter(f => f.visible).length;
     console.log('num_visible', num_visible)
+    const credits = agent.credits.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 })
     return (
         <div>
             {/* layer 0 */}
@@ -230,7 +231,7 @@ export default function Index() {
                 <div className="m-2 min-w-60 bg-white rounded p-3 z-10 pointer-events-auto">
                     <div>
                         <div>{agent.symbol} - {system_symbol}</div>
-                        <div>Credits: ${agent.credits}</div>
+                        <div>Credits: {credits}</div>
                         <div>Ships: {agent.shipCount}</div>
                     </div>
                 </div>
