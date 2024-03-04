@@ -5,6 +5,7 @@ import { json } from "@remix-run/react";
 import { useLoaderData } from "@remix-run/react";
 import { useEffect } from "react";
 import { useSocket } from "~/context";
+import { ship_model, ship_symbol_base10 } from "~/ship_utils";
 
 
 function resizeCanvasToDisplaySize(canvas) {    
@@ -40,6 +41,22 @@ export let loader: LoaderFunction = async () => {
     });
 };
 
+const initialFilters = (ships: any[]) => {
+    console.log('ships.length', ships.length)
+    const ship_models: any = []
+    ships.sort((a, b) => ship_symbol_base10(a.symbol) - ship_symbol_base10(b.symbol));
+    for (let ship of ships) {
+        const model = ship_model(ship);
+        const existing = ship_models.find(s => s.model === model)
+        if (existing) {
+            existing.count += 1
+        } else {
+            ship_models.push({model, count: 1, visible: true})
+        }
+    }
+    return ship_models
+}
+
 export default function Index() {
     const socket = useSocket();
     const canvasRef = useRef(null);
@@ -52,6 +69,8 @@ export default function Index() {
     const isMouseDownRef = useRef(false)
     const lastMousePosRef = useRef({x: 0, y: 0})
     const panRef = useRef({x: 0, y: 0});
+    const shipsRef = useRef([])
+    const filtersRef = useRef([])
 
     const { waypoints, agent: initialAgent, ships: initalShips } = useLoaderData<typeof loader>();
     const [agent, setAgent] = React.useState(initialAgent);
@@ -60,6 +79,9 @@ export default function Index() {
         width: 0,
         height: 0,
     })
+
+    // filters
+    const [filters, setFilters] = React.useState(initialFilters(initalShips))
 
     const render = () => {   
         if (!canvasRef.current) return;
@@ -70,9 +92,18 @@ export default function Index() {
             zoom: zoomRef.current,
             pan: panRef.current,
         }
-        draw(ctx, renderInfo, height, width, waypoints, ships)
+        const num_visible = filters.filter(f => f.visible).length;
+        console.log('num_visible', num_visible)
+        draw(ctx, renderInfo, height, width, waypoints, shipsRef.current, filtersRef.current)
         requestAnimationFrame(render);
     }
+
+    useEffect(() => {
+        shipsRef.current = ships;
+    }, [ships])
+    useEffect(() => {
+        filtersRef.current = filters;
+    }, [filters])
 
     useEffect(() => {
         if (!socket) return;
@@ -104,10 +135,10 @@ export default function Index() {
     React.useEffect(() => {
         if (!canvasRef.current) return;
         // render()
-    }, [canvasRef, dimensions, ships])
+    }, [canvasRef, dimensions, ships, filters])
 
     const handleWheel = (e) => {
-        e.preventDefault();
+        // e.preventDefault();
         e.stopPropagation();
         if (!canvasRef.current) return;
         // TODO: either preserve center of map during zoom, or preserve point under cursor
@@ -162,9 +193,29 @@ export default function Index() {
         return () => window.removeEventListener('resize', handleResize)
     }, [])
     
+    React.useEffect(() => {
+        console.log('filters changed', filters)
+    }, [filters])
+
+
+    const toggleModelVisibility = (model: string) => {
+        setFilters(filters.map((f: any) => {
+            if (f.model === model) {
+                return {
+                    ...f,
+                    visible: !f.visible
+                }
+            }
+            return f
+        }))
+    }
+
     const system_symbol = agent.headquarters.split('-').slice(0, 2).join('-');
+    const num_visible = filters.filter(f => f.visible).length;
+    console.log('num_visible', num_visible)
     return (
         <div>
+            {/* layer 0 */}
             <canvas className="absolute left-0 top-0 h-full w-full z-0"
                 ref={canvasRef}
                 onMouseDown={(e) =>{handleOnMouseDown(e)}}
@@ -173,11 +224,28 @@ export default function Index() {
                 onMouseOut={(e) =>{handleOnMouseOut(e)}}
                 onWheel={(e) =>{handleWheel(e)}}
             />
-            <div className="absolute left-0 top-0 z-10 m-2 min-w-80 min-h-80">
-                <div className="text-white">
-                    <div>{agent.symbol} - {system_symbol}</div>
-                    <div>Credits: ${agent.credits}</div>
-                    <div>Ships: {agent.shipCount}</div>
+            {/* layer 1 */}
+            <div className="absolute left-0 top-0 pointer-events-none">
+                {/* top left */}
+                <div className="m-2 min-w-60 bg-white rounded p-3 z-10 pointer-events-auto">
+                    <div>
+                        <div>{agent.symbol} - {system_symbol}</div>
+                        <div>Credits: ${agent.credits}</div>
+                        <div>Ships: {agent.shipCount}</div>
+                    </div>
+                </div>
+            </div>
+            <div className="absolute left-0 top-0 w-full pointer-events-none">
+                {/* top of the screen */}
+                <div className="my-5 mx-auto w-1/2 z-10 bg-white rounded p-3 flex flex-wrap pointer-events-auto justify-between">
+                    {
+                        filters.map(({model, count, visible}) => {
+                            const textClass = visible ? "underline" : "line-through";
+                            return(<div key={model} className = "px-2 select-none">
+                                <span className={textClass} onClick={() => toggleModelVisibility(model)}>{model}</span> ({count})
+                            </div>)
+                        })
+                    }
                 </div>
             </div>
         </div>

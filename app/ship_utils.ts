@@ -29,7 +29,7 @@ export function ship_model(ship: any) {
     });
 
     if (matchingModels.length === 1) {
-        return matchingModels[0][0];
+        return matchingModels[0][0].slice(5);
     }
     throw new Error(`${matchingModels.length} matching models for ship ${ship.symbol} with frame: ${ship.frame.symbol}, reactor: ${ship.reactor.symbol}, engine: ${ship.engine.symbol}`);
 }

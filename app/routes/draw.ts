@@ -1,7 +1,9 @@
 
+import { ship_model, ship_symbol_base10 } from "~/ship_utils";
+
 const is_market = (waypoint: any) => waypoint.traits.some((trait: any) => trait.symbol === 'MARKETPLACE');
 
-export default function draw(ctx, renderInfo, height: number, width: number, waypoints: any[], ships: any[]) {
+export default function draw(ctx, renderInfo, height: number, width: number, waypoints: any[], ships: any[], filters: any[]) {
     const { zoom, pan } = renderInfo;
 
     // black background
@@ -74,7 +76,6 @@ export default function draw(ctx, renderInfo, height: number, width: number, way
             is_market: is_market(waypoint),
         })
     }
-    console.log(waypoints_grouped)
 
     for (let waypoint of Object.values(waypoints_grouped)) {
         let radius = 3;
@@ -92,15 +93,21 @@ export default function draw(ctx, renderInfo, height: number, width: number, way
         ctx.fill();
 
         ctx.font = '10px monospace';
-        ctx.font = '10px monospace';
+        ctx.textAlign = 'right';
         const symbols = waypoint.map((w: any) => w.symbol).join(' ');
         // maybe only render the text closest to the mouse?
-        //ctx.fillText(waypoint[0].type, x + 5, y - 2);
-        //ctx.fillText(symbols, x + 5, y + 8);
+        ctx.fillText(waypoint[0].type, x - 5, y - 2);
+        ctx.fillText(symbols, x - 5, y + 8);
+        ctx.textAlign = 'left';
     }
 
     // Ships
     for (let ship of ships) {
+        const model = ship_model(ship);
+        const filter = filters.find((f) => f.model === model);
+        if (!filter || !filter.visible) {
+            continue;
+        }
         let x,y;
         if (ship.nav.status === 'IN_TRANSIT') {
             const { destination, origin } = ship.nav.route;
@@ -122,6 +129,8 @@ export default function draw(ctx, renderInfo, height: number, width: number, way
         ctx.arc(x, y, 1, 0, 2 * Math.PI);
         ctx.fill();
         ctx.font = '10px monospace';
-        ctx.fillText(ship.symbol, x + 5, y + 8);
+        ctx.fillText(ship.symbol, x + 5, y - 2);
+        ctx.fillText(model, x + 5, y + 8);
+        ctx.fillText(ship.nav.status, x + 5, y + 18);
     }
 }
