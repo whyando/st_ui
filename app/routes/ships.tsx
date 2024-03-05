@@ -40,10 +40,10 @@ export default function ShipsPage() {
 
   useEffect(() => {
     if (!socket) return;
-    console.log('socket on agent component', socket);
+    console.log('socket on ship component', socket);
 
     const on_ship_upd = (ship: any) => {      
-      console.log(`${ship.symbol} updated`)
+      // console.log(`${ship.symbol} updated`)
       setShips((ships) => {
         const idx = ships.findIndex((s) => s.symbol === ship.symbol);
         if (idx === -1) {

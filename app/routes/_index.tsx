@@ -42,7 +42,6 @@ export let loader: LoaderFunction = async () => {
 };
 
 const initialFilters = (ships: any[]) => {
-    console.log('ships.length', ships.length)
     const ship_models: any = []
     ships.sort((a, b) => ship_symbol_base10(a.symbol) - ship_symbol_base10(b.symbol));
     for (let ship of ships) {
@@ -92,8 +91,6 @@ export default function Index() {
             zoom: zoomRef.current,
             pan: panRef.current,
         }
-        const num_visible = filters.filter(f => f.visible).length;
-        console.log('num_visible', num_visible)
         draw(ctx, renderInfo, height, width, waypoints, shipsRef.current, filtersRef.current)
         requestAnimationFrame(render);
     }
@@ -192,11 +189,6 @@ export default function Index() {
         window.addEventListener('resize', handleResize)
         return () => window.removeEventListener('resize', handleResize)
     }, [])
-    
-    React.useEffect(() => {
-        console.log('filters changed', filters)
-    }, [filters])
-
 
     const toggleModelVisibility = (model: string) => {
         setFilters(filters.map((f: any) => {
@@ -211,8 +203,6 @@ export default function Index() {
     }
 
     const system_symbol = agent.headquarters.split('-').slice(0, 2).join('-');
-    const num_visible = filters.filter(f => f.visible).length;
-    console.log('num_visible', num_visible)
     const credits = agent.credits.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 })
     return (
         <div>
