@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { useSocket } from "~/context";
 
 export const loader = async () => {
-  const uri = 'https://red1.whyando.com/api/agent';
+  const uri = `${process.env.API_URL}/api/agent`;
   const response = await fetch(uri);
   const data = await response.json();
   return json(data);

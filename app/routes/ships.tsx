@@ -12,7 +12,7 @@ export const links: LinksFunction = () => [
 ];
 
 export const loader = async () => {
-  const uri = 'https://red1.whyando.com/api/ships';
+  const uri = `${process.env.API_URL}/api/ships`;
   const response = await fetch(uri);
   const data = await response.json();
   return json(data);

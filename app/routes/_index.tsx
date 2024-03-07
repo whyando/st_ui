@@ -6,6 +6,7 @@ import { useLoaderData } from "@remix-run/react";
 import { useEffect } from "react";
 import { useSocket } from "~/context";
 import { ship_model, ship_symbol_base10 } from "~/ship_utils";
+import { LoaderFunction } from "@remix-run/node";
 
 
 function resizeCanvasToDisplaySize(canvas) {    
@@ -18,15 +19,15 @@ function resizeCanvasToDisplaySize(canvas) {
 
 export let loader: LoaderFunction = async () => {
     const waypoints_req = async () => {
-        const response = await fetch("https://red1.whyando.com/api/waypoints");
+        const response = await fetch(`${process.env.API_URL}/api/waypoints`);
         return await response.json();
     }
     const ships_req = async () => {
-        const response = await fetch("https://red1.whyando.com/api/ships");
+        const response = await fetch(`${process.env.API_URL}/api/ships`);
         return await response.json();
     }
     const agent_req = async () => {
-        const response = await fetch("https://red1.whyando.com/api/agent");
+        const response = await fetch(`${process.env.API_URL}/api/agent`);
         return await response.json();
     }
     const [ agent, ships, waypoints ] = await Promise.all([

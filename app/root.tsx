@@ -7,6 +7,8 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  json,
+  useLoaderData,
 } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import type { Socket } from "socket.io-client";
@@ -19,12 +21,21 @@ export const links: LinksFunction = () => [
   ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
 ];
 
+export async function loader() {
+  return json({
+    ENV: {
+      API_URL: process.env.API_URL,
+    },
+  });
+}
+
 export default function App() {
+  const data = useLoaderData<typeof loader>();
   const [socket, setSocket] = useState<Socket>();
 
   useEffect(() => {
     console.log('open socket');
-    const socket = io("https://red1.whyando.com", {
+    const socket = io(window.ENV.API_URL, {
       path: "/api/events",
       transports: ["websocket"],
       addTrailingSlash: false,
@@ -57,6 +68,13 @@ export default function App() {
       <body className = "h-full w-full">
         <SocketProvider socket={socket}>
           <Outlet />
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `window.ENV = ${JSON.stringify(
+                data.ENV
+              )}`,
+            }}
+          />
         </SocketProvider>
         <ScrollRestoration />
         <Scripts />
