@@ -3,7 +3,7 @@ import { ship_model, ship_symbol_base10 } from "~/ship_utils";
 
 const is_market = (waypoint: any) => waypoint.traits.some((trait: any) => trait.symbol === 'MARKETPLACE');
 
-export default function draw(ctx, renderInfo, height: number, width: number, waypoints: any[], ships: any[], filters: any[]) {
+export default function draw(ctx, renderInfo, height: number, width: number, waypoints: any[], ships: any[], filters: {}) {
     const { zoom, pan } = renderInfo;
 
     // black background
@@ -104,8 +104,8 @@ export default function draw(ctx, renderInfo, height: number, width: number, way
     // Ships
     for (let ship of ships) {
         const model = ship_model(ship);
-        const filter = filters.find((f) => f.model === model);
-        if (!filter || !filter.visible) {
+        const visible = (model in filters) ? filters[model].visible : true;
+        if (!visible) {
             continue;
         }
         let x,y;

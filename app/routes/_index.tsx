@@ -42,7 +42,7 @@ export let loader: LoaderFunction = async () => {
     });
 };
 
-const initialFilters = (ships: any[]) => {
+const getShipModelCounts = (ships: any[]) => {
     const ship_models: any = []
     ships.sort((a, b) => ship_symbol_base10(a.symbol) - ship_symbol_base10(b.symbol));
     for (let ship of ships) {
@@ -51,7 +51,7 @@ const initialFilters = (ships: any[]) => {
         if (existing) {
             existing.count += 1
         } else {
-            ship_models.push({model, count: 1, visible: true})
+            ship_models.push({model, count: 1})
         }
     }
     return ship_models
@@ -81,7 +81,7 @@ export default function Index() {
     })
 
     // filters
-    const [filters, setFilters] = React.useState(initialFilters(initalShips))
+    const [filters, setFilters] = React.useState({})
 
     const render = () => {   
         if (!canvasRef.current) return;
@@ -111,7 +111,7 @@ export default function Index() {
             setShips((ships: any[]) => {
                 const idx = ships.findIndex((s) => s.symbol === ship.symbol);
                 if (idx === -1) {
-                    return ships;
+                    return [...ships, ship];
                 }
                 const new_ships = [...ships];
                 new_ships[idx] = ship;
@@ -192,19 +192,15 @@ export default function Index() {
     }, [])
 
     const toggleModelVisibility = (model: string) => {
-        setFilters(filters.map((f: any) => {
-            if (f.model === model) {
-                return {
-                    ...f,
-                    visible: !f.visible
-                }
-            }
-            return f
-        }))
+        setFilters((filters: any) => {
+            const prev_value = (model in filters) ? filters[model].visible : true;
+            return {...filters, [model]: {visible: !prev_value}}     
+        })
     }
 
     const system_symbol = agent.headquarters.split('-').slice(0, 2).join('-');
     const credits = agent.credits.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 })
+    const ship_counts = getShipModelCounts(ships)
     return (
         <div>
             {/* layer 0 */}
@@ -231,7 +227,8 @@ export default function Index() {
                 {/* top of the screen */}
                 <div className="my-5 mx-auto w-1/2 z-10 bg-white rounded p-3 flex flex-wrap pointer-events-auto justify-between">
                     {
-                        filters.map(({model, count, visible}) => {
+                        ship_counts.map(({model, count }) => {
+                            const visible = (model in filters) ? filters[model].visible : true;
                             const textClass = visible ? "underline" : "line-through";
                             return(<div key={model} className = "px-2 select-none">
                                 <span className={textClass} onClick={() => toggleModelVisibility(model)}>{model}</span> ({count})

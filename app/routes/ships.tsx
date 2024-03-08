@@ -47,7 +47,7 @@ export default function ShipsPage() {
       setShips((ships) => {
         const idx = ships.findIndex((s) => s.symbol === ship.symbol);
         if (idx === -1) {
-          return ships;
+          return [...ships, ship];
         }
         const new_ships = [...ships];
         new_ships[idx] = ship;
