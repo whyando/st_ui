@@ -28,6 +28,8 @@ function ShipRow({ ship } : { ship: any}) {
       <td>{ship.nav.status}</td>
       <td>{ship.nav.waypointSymbol}</td>
       <td>{cargo}</td>
+      <td>{ship.frame.condition} / {ship.engine.condition} / {ship.reactor.condition}</td>
+      <td>{ship.frame.integrity} / {ship.engine.integrity} / {ship.reactor.integrity}</td>
     </tr>
   );
 }
@@ -74,6 +76,8 @@ export default function ShipsPage() {
           <th>Status</th>
           <th>Waypoint</th>
           <th>Cargo</th>
+          <th>Condition FER</th>
+          <th>Integrity FER</th>
         </tr>
       {ships.map((ship: any) => (
         <ShipRow key={ship.id} ship={ship} />
