@@ -18,6 +18,12 @@ export const loader = async () => {
   return json(data);
 };
 
+
+const percent = (x: number) => {
+  return `${Math.round(10000 * x) / 100}%`  
+}
+
+
 function ShipRow({ ship } : { ship: any}) {
   const cargo = ship.cargo.inventory.map((c: any) => `${c.symbol} (${c.units})`).join(', ');
   return (
@@ -28,8 +34,8 @@ function ShipRow({ ship } : { ship: any}) {
       <td>{ship.nav.status}</td>
       <td>{ship.nav.waypointSymbol}</td>
       <td>{cargo}</td>
-      <td>{ship.frame.condition} / {ship.engine.condition} / {ship.reactor.condition}</td>
-      <td>{ship.frame.integrity} / {ship.engine.integrity} / {ship.reactor.integrity}</td>
+      <td>{percent(ship.frame.condition)} / {percent(ship.engine.condition)} / {percent(ship.reactor.condition)}</td>
+      <td>{percent(ship.frame.integrity)} / {percent(ship.engine.integrity)} / {percent(ship.reactor.integrity)}</td>
     </tr>
   );
 }
