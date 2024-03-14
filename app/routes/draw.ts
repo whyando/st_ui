@@ -12,6 +12,7 @@ export default function draw(ctx, renderInfo, height: number, width: number, way
 
     // const waypoints_filtered = waypoints.filter(waypoint => waypoint.traits.some((trait: any) => trait.symbol === 'MARKETPLACE'));
     const waypoints_filtered = waypoints
+    const system_symbol = waypoints[0].systemSymbol
 
     let xMax = -Infinity;
     let yMax = -Infinity;
@@ -105,7 +106,7 @@ export default function draw(ctx, renderInfo, height: number, width: number, way
     for (let ship of ships) {
         const model = ship_model(ship);
         const visible = (model in filters) ? filters[model].visible : true;
-        if (!visible) {
+        if (!visible || ship.nav.systemSymbol != system_symbol) {
             continue;
         }
         let x,y;
