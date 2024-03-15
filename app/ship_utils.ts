@@ -83,7 +83,26 @@ const SHIP_MODELS = {
         engine: "ENGINE_IMPULSE_DRIVE_I",
         req_modules: ["MODULE_GAS_PROCESSOR_I"],
         req_mounts: ["MOUNT_GAS_SIPHON_I"]
-    }
+    },
+    "SHIP_REFINING_FREIGHTER": {
+        frame: "FRAME_HEAVY_FREIGHTER",
+        reactor: "REACTOR_FUSION_I",
+        engine: "ENGINE_ION_DRIVE_II",
+        req_modules: ["MODULE_CARGO_HOLD_III", "MODULE_ORE_REFINERY_I"],
+        req_mounts: ["MOUNT_MISSILE_LAUNCHER_I"],
+    },
+    "SHIP_ORE_HOUND": {
+        frame: "FRAME_MINER",
+        reactor: "REACTOR_FISSION_I",
+        engine: "ENGINE_ION_DRIVE_I",
+        req_modules: ["MODULE_MINERAL_PROCESSOR_I"],
+        req_mounts: ["MOUNT_MINING_LASER_II", "MOUNT_SURVEYOR_I"],
+    },
+    "SHIP_EXPLORER": {
+        frame: "FRAME_EXPLORER",
+        reactor: "REACTOR_FUSION_I",
+        engine: "ENGINE_ION_DRIVE_II",
+        req_modules: ["MODULE_WARP_DRIVE_I"],
+        req_mounts: ["MOUNT_SENSOR_ARRAY_II", "MOUNT_GAS_SIPHON_II"],
+    },
 };
-
-
