@@ -219,7 +219,7 @@ export default function Index() {
                 {/* top left */}
                 <div className="m-2 min-w-60 bg-white rounded p-3 z-10 pointer-events-auto">
                     <div>
-                        <div>{agent.symbol}</div>
+                        <div>{agent.symbol} - {agent.startingFaction}</div>
                         <div>Starting System: {starter_system}</div>
                         <div>Credits: {credits}</div>
                         <div>Ships: {agent.shipCount}</div>
