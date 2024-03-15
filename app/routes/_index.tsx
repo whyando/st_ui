@@ -42,10 +42,11 @@ export let loader: LoaderFunction = async () => {
     });
 };
 
-const getShipModelCounts = (ships: any[]) => {
+const getShipModelCounts = (system_symbol: string, ships: any[]) => {
     const ship_models: any = []
     ships.sort((a, b) => ship_symbol_base10(a.symbol) - ship_symbol_base10(b.symbol));
-    for (let ship of ships) {
+    const ships_filtered = ships.filter(s => s.nav.systemSymbol == system_symbol)
+    for (let ship of ships_filtered) {
         const model = ship_model(ship);
         const existing = ship_models.find(s => s.model === model)
         if (existing) {
@@ -73,6 +74,7 @@ export default function Index() {
     const filtersRef = useRef([])
 
     const { waypoints, agent: initialAgent, ships: initalShips } = useLoaderData<typeof loader>();
+    const system_symbol = waypoints[0].systemSymbol
     const [agent, setAgent] = React.useState(initialAgent);
     const [ships, setShips] = React.useState(initalShips);
     const [dimensions, setDimensions] = React.useState({
@@ -198,9 +200,9 @@ export default function Index() {
         })
     }
 
-    const system_symbol = agent.headquarters.split('-').slice(0, 2).join('-');
+    const starter_system = agent.headquarters.split('-').slice(0, 2).join('-');
     const credits = agent.credits.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 })
-    const ship_counts = getShipModelCounts(ships)
+    const ship_counts = getShipModelCounts(system_symbol, ships)
     return (
         <div>
             {/* layer 0 */}
@@ -217,7 +219,8 @@ export default function Index() {
                 {/* top left */}
                 <div className="m-2 min-w-60 bg-white rounded p-3 z-10 pointer-events-auto">
                     <div>
-                        <div>{agent.symbol} - {system_symbol}</div>
+                        <div>{agent.symbol}</div>
+                        <div>Starting System: {starter_system}</div>
                         <div>Credits: {credits}</div>
                         <div>Ships: {agent.shipCount}</div>
                     </div>
@@ -225,7 +228,9 @@ export default function Index() {
             </div>
             <div className="absolute left-0 top-0 w-full pointer-events-none">
                 {/* top of the screen */}
-                <div className="my-5 mx-auto w-1/2 z-10 bg-white rounded p-3 flex flex-wrap pointer-events-auto justify-between">
+                <div className="my-5 mx-auto w-1/2 z-10 bg-white rounded p-3 pointer-events-auto justify-between">                
+                    System: {system_symbol}<br/>
+                    <div className="flex flex-wrap">
                     {
                         ship_counts.map(({model, count }) => {
                             const visible = (model in filters) ? filters[model].visible : true;
@@ -235,6 +240,7 @@ export default function Index() {
                             </div>)
                         })
                     }
+                    </div>
                 </div>
             </div>
         </div>
