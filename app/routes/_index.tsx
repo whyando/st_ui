@@ -1,12 +1,9 @@
 import React from "react";
 import { useRef } from "react";
 import draw from "~/routes/draw";
-import { json } from "@remix-run/react";
-import { useLoaderData } from "@remix-run/react";
 import { useEffect } from "react";
 import { useSocket } from "~/context";
 import { ship_model, ship_symbol_base10 } from "~/ship_utils";
-import { LoaderFunction } from "@remix-run/node";
 
 
 function resizeCanvasToDisplaySize(canvas) {    
@@ -17,35 +14,10 @@ function resizeCanvasToDisplaySize(canvas) {
     }
 }
 
-export let loader: LoaderFunction = async () => {
-    const waypoints_req = async () => {
-        const response = await fetch(`${process.env.API_URL}/api/waypoints`);
-        return await response.json();
-    }
-    const ships_req = async () => {
-        const response = await fetch(`${process.env.API_URL}/api/ships`);
-        return await response.json();
-    }
-    const agent_req = async () => {
-        const response = await fetch(`${process.env.API_URL}/api/agent`);
-        return await response.json();
-    }
-    const [ agent, ships, waypoints ] = await Promise.all([
-        agent_req(),
-        ships_req(),
-        waypoints_req(),
-    ]);
-    return json({
-        waypoints,
-        ships,
-        agent,
-    });
-};
-
-const getShipModelCounts = (system_symbol: string, ships: any[]) => {
+const getShipModelCounts = (systemSymbol: string, ships: any[]) => {
     const ship_models: any = []
     ships.sort((a, b) => ship_symbol_base10(a.symbol) - ship_symbol_base10(b.symbol));
-    const ships_filtered = ships.filter(s => s.nav.systemSymbol == system_symbol)
+    const ships_filtered = ships.filter(s => s.nav.systemSymbol == systemSymbol)
     for (let ship of ships_filtered) {
         const model = ship_model(ship);
         const existing = ship_models.find(s => s.model === model)
@@ -72,11 +44,12 @@ export default function Index() {
     const panRef = useRef({x: 0, y: 0});
     const shipsRef = useRef([])
     const filtersRef = useRef([])
+    const waypointsRef = useRef([])
 
-    const { waypoints, agent: initialAgent, ships: initalShips } = useLoaderData<typeof loader>();
-    const system_symbol = waypoints[0].systemSymbol
-    const [agent, setAgent] = React.useState(initialAgent);
-    const [ships, setShips] = React.useState(initalShips);
+    const [systemSymbol, setSystemSymbol] = React.useState('');
+    const [waypoints, setWaypoints] = React.useState([]);
+    const [agent, setAgent] = React.useState({});
+    const [ships, setShips] = React.useState([]);
     const [dimensions, setDimensions] = React.useState({
         width: 0,
         height: 0,
@@ -94,13 +67,38 @@ export default function Index() {
             zoom: zoomRef.current,
             pan: panRef.current,
         }
-        draw(ctx, renderInfo, height, width, waypoints, shipsRef.current, filtersRef.current)
+        draw(ctx, renderInfo, height, width, waypointsRef.current, shipsRef.current, filtersRef.current)
         requestAnimationFrame(render);
     }
 
     useEffect(() => {
+        const waypoints_req = async () => {
+            const response = await fetch(`${window.ENV.API_URL}/api/starter_system/waypoints`);
+            const waypoints = await response.json();
+            setWaypoints(waypoints);
+            setSystemSymbol(waypoints[0].systemSymbol);
+        }
+        const ships_req = async () => {
+            const response = await fetch(`${window.ENV.API_URL}/api/ships`);
+            const ships = await response.json();
+            setShips(ships);
+        }
+        const agent_req = async () => {
+            const response = await fetch(`${window.ENV.API_URL}/api/agent`);
+            const agent = await response.json();
+            setAgent(agent);
+        }
+        waypoints_req()
+        ships_req()
+        agent_req()
+    }, [])
+
+    useEffect(() => {
         shipsRef.current = ships;
     }, [ships])
+    useEffect(() => {
+        waypointsRef.current = waypoints;
+    }, [waypoints])
     useEffect(() => {
         filtersRef.current = filters;
     }, [filters])
@@ -200,9 +198,9 @@ export default function Index() {
         })
     }
 
-    const starter_system = agent.headquarters.split('-').slice(0, 2).join('-');
-    const credits = agent.credits.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 })
-    const ship_counts = getShipModelCounts(system_symbol, ships)
+    const starter_system = agent?.headquarters?.split('-')?.slice(0, 2)?.join('-');
+    const credits = agent?.credits?.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 })
+    const ship_counts = getShipModelCounts(systemSymbol, ships)
     return (
         <div>
             {/* layer 0 */}
@@ -219,17 +217,17 @@ export default function Index() {
                 {/* top left */}
                 <div className="m-2 min-w-60 bg-white rounded p-3 z-10 pointer-events-auto">
                     <div>
-                        <div>{agent.symbol} - {agent.startingFaction}</div>
+                        <div>{agent?.symbol} - {agent?.startingFaction}</div>
                         <div>Starting System: {starter_system}</div>
                         <div>Credits: {credits}</div>
-                        <div>Ships: {agent.shipCount}</div>
+                        <div>Ships: {agent?.shipCount}</div>
                     </div>
                 </div>
             </div>
             <div className="absolute left-0 top-0 w-full pointer-events-none">
                 {/* top of the screen */}
                 <div className="my-5 mx-auto w-1/2 z-10 bg-white rounded p-3 pointer-events-auto justify-between">                
-                    System: {system_symbol}<br/>
+                    System: {systemSymbol}<br/>
                     <div className="flex flex-wrap">
                     {
                         ship_counts.map(({model, count }) => {

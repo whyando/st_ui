@@ -4,6 +4,9 @@ import { ship_model, ship_symbol_base10 } from "~/ship_utils";
 const is_market = (waypoint: any) => waypoint.traits.some((trait: any) => trait.symbol === 'MARKETPLACE');
 
 export default function draw(ctx, renderInfo, height: number, width: number, waypoints: any[], ships: any[], filters: {}) {
+    if (waypoints.length === 0) {
+        return;
+    }
     const { zoom, pan } = renderInfo;
 
     // black background

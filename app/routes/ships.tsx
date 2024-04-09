@@ -11,14 +11,6 @@ export const links: LinksFunction = () => [
   { rel: "stylesheet", href: styles },
 ];
 
-export const loader = async () => {
-  const uri = `${process.env.API_URL}/api/ships`;
-  const response = await fetch(uri);
-  const data = await response.json();
-  return json(data);
-};
-
-
 const percent = (x: number) => {
   return `${Math.round(10000 * x) / 100}%`  
 }
@@ -43,8 +35,22 @@ function ShipRow({ ship } : { ship: any}) {
 
 export default function ShipsPage() {
   const socket = useSocket();
-  const ships_initial = useLoaderData<typeof loader>();
-  const [ships, setShips] = useState<any[]>(ships_initial);
+  const [ships, setShips] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchShips = async () => {
+      try {
+        const uri = `${window.ENV.API_URL}/api/ships`;
+        const response = await fetch(uri);
+        const data = await response.json();
+        setShips(data);
+      } catch (error) {
+        console.error('Error fetching ships:', error);
+      }
+    };
+
+    fetchShips();
+  }, []);
 
   useEffect(() => {
     if (!socket) return;
