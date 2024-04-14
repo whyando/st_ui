@@ -106,7 +106,8 @@ export default function draw(ctx, renderInfo, height: number, width: number, way
     }
 
     // Ships
-    for (let ship of ships) {
+    for (let _ship of ships) {
+        const ship = _ship.ship;
         const model = ship_model(ship);
         const visible = (model in filters) ? filters[model].visible : true;
         if (!visible || ship.nav.systemSymbol != system_symbol) {

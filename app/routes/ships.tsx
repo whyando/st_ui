@@ -16,18 +16,21 @@ const percent = (x: number) => {
 }
 
 
-function ShipRow({ ship } : { ship: any}) {
+function ShipRow({ ship: _ship } : { ship: any}) {
+  const { symbol, ship, job_id, desc } = _ship;
   const cargo = ship.cargo.inventory.map((c: any) => `${c.symbol} (${c.units})`).join(', ');
   return (
     <tr>
-      <td>{ship_symbol_base10(ship.symbol)}</td>
-      <td>{ship.symbol}</td>
+      <td>{ship_symbol_base10(symbol)}</td>
+      <td>{symbol}</td>
       <td>{ship_model(ship)}</td>
+      <td>{job_id}</td>
       <td>{ship.nav.status}</td>
       <td>{ship.nav.waypointSymbol}</td>
       <td>{cargo}</td>
       <td>{percent(ship.frame.condition)} / {percent(ship.engine.condition)} / {percent(ship.reactor.condition)}</td>
       <td>{percent(ship.frame.integrity)} / {percent(ship.engine.integrity)} / {percent(ship.reactor.integrity)}</td>
+      <td>{desc}</td>
     </tr>
   );
 }
@@ -56,16 +59,15 @@ export default function ShipsPage() {
     if (!socket) return;
     console.log('socket on ship component', socket);
 
-    const on_ship_upd = (ship: any) => {      
-      // console.log(`${ship.symbol} updated`)
-      setShips((ships) => {
-        const idx = ships.findIndex((s) => s.symbol === ship.symbol);
-        if (idx === -1) {
-          return [...ships, ship];
-        }
-        const new_ships = [...ships];
-        new_ships[idx] = ship;
-        return new_ships;
+    const on_ship_upd = (ship: any) => {     
+      setShips((ships: any[]) => {
+          const idx = ships.findIndex((s) => s.symbol === ship.symbol);
+          if (idx === -1) {
+              return [...ships, { symbol: ship.symbol, ship, job_id: '', desc: '' }];
+          }
+          const new_ships = [...ships];
+          new_ships[idx].ship = ship;
+          return new_ships;
       })
     }
     socket.on('ship_upd', on_ship_upd)
@@ -85,11 +87,13 @@ export default function ShipsPage() {
           <th></th>
           <th>Symbol</th>
           <th>Model</th>
+          <th>Job</th>
           <th>Status</th>
           <th>Waypoint</th>
           <th>Cargo</th>
           <th>Condition FER</th>
           <th>Integrity FER</th>
+          <th>Desc</th>
         </tr>
       {ships.map((ship: any) => (
         <ShipRow key={ship.id} ship={ship} />

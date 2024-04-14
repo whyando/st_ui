@@ -17,9 +17,9 @@ function resizeCanvasToDisplaySize(canvas) {
 const getShipModelCounts = (systemSymbol: string, ships: any[]) => {
     const ship_models: any = []
     ships.sort((a, b) => ship_symbol_base10(a.symbol) - ship_symbol_base10(b.symbol));
-    const ships_filtered = ships.filter(s => s.nav.systemSymbol == systemSymbol)
+    const ships_filtered = ships.filter(s => s.ship.nav.systemSymbol == systemSymbol)
     for (let ship of ships_filtered) {
-        const model = ship_model(ship);
+        const model = ship_model(ship.ship);
         const existing = ship_models.find(s => s.model === model)
         if (existing) {
             existing.count += 1
@@ -111,10 +111,10 @@ export default function Index() {
             setShips((ships: any[]) => {
                 const idx = ships.findIndex((s) => s.symbol === ship.symbol);
                 if (idx === -1) {
-                    return [...ships, ship];
+                    return [...ships, { symbol: ship.symbol, ship, job_id: '', desc: '' }];
                 }
                 const new_ships = [...ships];
-                new_ships[idx] = ship;
+                new_ships[idx].ship = ship;
                 return new_ships;
             })
         }
