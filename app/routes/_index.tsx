@@ -73,7 +73,8 @@ export default function Index() {
 
     useEffect(() => {
         const waypoints_req = async () => {
-            const response = await fetch(`${window.ENV.API_URL}/api/starter_system/waypoints`);
+            // const response = await fetch(`${window.ENV.API_URL}/api/starter_system/waypoints`);
+            const response = await fetch(`${window.ENV.API_URL}/api/capital_system/waypoints`);
             const waypoints = await response.json();
             setWaypoints(waypoints);
             setSystemSymbol(waypoints[0].systemSymbol);
